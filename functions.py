@@ -75,6 +75,8 @@ def achord(amplitudes, frequencies, duration,k):
 
     audio_array = np.array(audio_data)
     k1 = 70 + 29 * (1 - math.exp(-5 * data['Amplitude'][i]))
+    if k1 == 100:
+       k1 = 99
     audio_array = audio_array/max(audio_array)/(100 - k1)
     Amp[f'Amplitude {i}'] = audio_array
     Amp['Total_Amplitude'] = Amp[[col for col in Amp.columns if 'Amplitude' in col]].sum(axis=1)
@@ -131,7 +133,6 @@ def chord(L, d, A0, c, k):
   line, = ax.plot(x, y)
   ax.set_xlim([0, L])
   ax.set_ylim(-A0, A0)
-  ani = FuncAnimation(fig, update, frames=200, blit=True, interval=10)
   
   amp = []
   freq = []
@@ -145,6 +146,8 @@ def chord(L, d, A0, c, k):
   freq_adj = 2000* freq_adj
   freq_new = freq_adj.tolist()
   audio_data = achord(amp, freq_new, 10, k)
+
+  ani = FuncAnimation(fig, update, frames=200, blit=True, interval=10)
 
   display(Audio(data = audio_data, rate=88100, autoplay=True, normalize=True))
 
