@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 from scipy.ndimage import gaussian_filter1d
+from moviepy.editor import VideoFileClip, AudioFileClip
+from pydub import AudioSegment
 
 def sound_plot(Am, f, duration):
 
@@ -151,3 +153,61 @@ def chord(L, d, A0, c, k):
   display(Audio(data = audio_data, rate=88100, autoplay=True, normalize=True))
 
   plt.show()
+
+def gif_chord(L, d, A0, c, k):
+  
+  fig, ax = plt.subplots()
+  t = 0
+  d = d*L
+  n = 5
+  x = np.linspace(0, L, 10000)
+  k2 = 10*k
+
+  def update(frame):
+      nonlocal t
+      t += 0.05
+      y = np.zeros_like(x)
+      for i in range(1,n+1):
+        An = (2*A0*L**2)/((i**2)*(math.pi**2)*d*(L*d))*np.sin(d*i*math.pi/L)
+        y += An*np.sin(i*math.pi*x/L)*np.cos(2*np.pi*i*c*t/2*L)*math.e**(-k2*t)
+      y = gaussian_filter1d(y, sigma=100)
+      line.set_ydata(y)
+      return line,
+
+  y = np.zeros_like(x)
+  line, = ax.plot(x, y)
+  ax.set_xticks([])
+  ax.set_yticks([])
+  ax.set_xticklabels([])
+  ax.set_yticklabels([])
+  ax.spines['top'].set_visible(False)
+  ax.spines['right'].set_visible(False)
+  ax.spines['bottom'].set_visible(False)
+  ax.spines['left'].set_visible(False)
+  ax.set_xlim([0, L])
+  ax.set_ylim(-A0, A0)
+  plt.title('Guitar Chord')
+  
+  amp = []
+  freq = []
+  for i in range(1,n+1):
+    An = (2*A0*L**2)/((i**2)*(math.pi**2)*d*(L*d))*np.sin(d*i*math.pi/L)
+    y += An*np.sin(i*math.pi*x/L)*np.cos(2*np.pi*i*c*t/2*L)*math.e**(-k*t)
+    amp.append(An)
+    freq.append(i*c/(2*L))
+  freq_adj = np.array(freq)
+  freq_adj = 1500* freq_adj
+  freq_new = freq_adj.tolist()
+  audio_data = achord(amp, freq_new, 8, k)
+
+  ani = FuncAnimation(fig, update, frames=200, blit=True, repeat=True, interval=5)
+
+  audio = Audio(data = audio_data, rate=88100, autoplay=True, normalize=True)
+
+  with open('audio.mp3', 'wb') as f:
+    f.write(audio.data)
+
+  ani.save('animation.gif', writer='imagemagick')
+
+  clip = VideoFileClip("animation.gif")
+  clip.write_videofile("pvideo.mp4")
