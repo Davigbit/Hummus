@@ -20,7 +20,7 @@ def sound_plot(Am, f, duration):
       t_list.append(t)
       A = Am * np.sin(2 * np.pi * f * t) * math.exp(-3*t)
       A_list.append(A)
-      audio_data.append(int(A * 32767))
+      audio_data.append(A)
 
     plt.plot(t_list, A_list)
     plt.xlabel('Time (s)')
@@ -41,7 +41,7 @@ def sound_damped(Am, f, duration, k):
       t += delta_t
       t_list.append(t)
       A = Am/100 * np.sin(2 * np.pi * f * t) * math.exp(-5*k*t)
-      audio_data.append(int(A * 32767))
+      audio_data.append(A)
     audio_array = np.array(audio_data)
     k1 = 70 + 29 * (1 - math.exp(-5 * Am))
     audio_array = audio_array/max(audio_array)/(100 - k1)
@@ -71,7 +71,7 @@ def achord(amplitudes, frequencies, duration,k):
         t += delta_t
         t_list.append(t)
         A = (data['Amplitude'][i])/100 * np.sin(2 * np.pi * data["Frequency"][i] * t) * math.exp(-5*k*t)
-        audio_data.append(int(A * 32767))
+        audio_data.append(A)
 
     audio_array = np.array(audio_data)
     k1 = 70 + 29 * (1 - math.exp(-5 * data['Amplitude'][i]))
@@ -136,7 +136,6 @@ def chord(L, d, A0, c, k):
   
   amp = []
   freq = []
-  data = pd.DataFrame()
   for i in range(1,n+1):
     An = (2*A0*L**2)/((i**2)*(math.pi**2)*d*(L*d))*np.sin(d*i*math.pi/L)
     y += An*np.sin(i*math.pi*x/L)*np.cos(2*np.pi*i*c*t/2*L)*math.e**(-k*t)
@@ -147,7 +146,7 @@ def chord(L, d, A0, c, k):
   freq_new = freq_adj.tolist()
   audio_data = achord(amp, freq_new, 10, k)
 
-  ani = FuncAnimation(fig, update, frames=200, blit=True, interval=10)
+  ani = FuncAnimation(fig, update, frames=200, blit=True, repeat=True, interval=10)
 
   display(Audio(data = audio_data, rate=88100, autoplay=True, normalize=True))
 
