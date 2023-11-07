@@ -1,4 +1,4 @@
-# hummus
+# HUMMUS
 McGill Physics Hackathon 2023
 
 Inspiration:
